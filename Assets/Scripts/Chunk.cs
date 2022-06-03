@@ -9,5 +9,34 @@ public class Chunk : MonoBehaviour
     [HideInInspector]
     public GameObject[] tiles = new GameObject[0];
 
-    
+    public Vector3 connectionPoint;
+
+    public List<Trap> traps = new List<Trap>();
+
+    public bool ingame;
+
+    Camera cam;
+    private void Start()
+    {
+        cam = Camera.main;
+    }
+
+
+    private void Update()
+    {
+        if (ingame && this.transform.position.z + connectionPoint.z < cam.transform.position.z) Recycle();
+    }
+
+    public void Recycle()
+    {
+        this.transform.position = Vector3.one * Random.Range(-5000, -50);
+        LevelGenerator.instance.chunks.Add(this.gameObject);
+        ingame = false;
+
+        foreach(Trap trap in traps)
+        {
+            trap.Reset();
+        }
+    }
+
 }

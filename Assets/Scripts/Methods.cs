@@ -352,4 +352,18 @@ public static class Methods
         // Returns the unit vector 
         return P.normalized;
     }
+
+    public static Vector3 DirectionToVector(TrapDirection dir)
+    {
+        switch (dir)
+        {
+            case TrapDirection.Up: return Vector3.up;
+            case TrapDirection.Down: return Vector3.down;
+            case TrapDirection.Left: return Vector3.left;
+            case TrapDirection.Right: return Vector3.right;
+            case TrapDirection.Forward: return Vector3.forward;
+            case TrapDirection.Backward: return Vector3.back;
+            default: return Vector3.zero;
+        }
+    }
 }

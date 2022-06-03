@@ -12,6 +12,12 @@ public class PlayerController : MonoBehaviour
 
     Rigidbody rb;
 
+    public static PlayerController instance;
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     // Start is called before the first frame update
     void Start()
