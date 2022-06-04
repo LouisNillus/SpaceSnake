@@ -84,7 +84,10 @@ public class ChunkMakerInspector : Editor
                     {
                         if (Get1DElementIndex(tiles, i, j).objectReferenceValue == null)
                         {
-                            Get1DElementIndex(tiles, i, j).objectReferenceValue = Instantiate(tileTemplate.objectReferenceValue as GameObject, new Vector3(i, 0, j), Quaternion.identity);
+                            Object o = Get1DElementIndex(tiles, i, j).objectReferenceValue = PrefabUtility.InstantiatePrefab(tileTemplate.objectReferenceValue);
+                            GameObject go = o as GameObject;
+
+                            go.transform.position = new Vector3(i, 0, j);
                         }
                         else
                         {
@@ -135,7 +138,17 @@ public class ChunkMakerInspector : Editor
                     {
                         if (!trapFound)
                         {
-                            GameObject go = Instantiate(trapTemplate.objectReferenceValue as GameObject, new Vector3(i, trapDirection == TrapDirection.Up ? -1f : 0.35f, j), Quaternion.identity);
+                            GameObject _trapTemplate = trapTemplate.objectReferenceValue as GameObject;
+                            GameObject _tileTemplate = tileTemplate.objectReferenceValue as GameObject;
+
+
+
+                            float posFromScale = (_trapTemplate.transform.localScale.y / 2f);
+
+                            Object o = PrefabUtility.InstantiatePrefab(trapTemplate.objectReferenceValue);
+                            GameObject go = o as GameObject;
+
+                            go.transform.position = new Vector3(i, trapDirection == TrapDirection.Up ? -posFromScale : posFromScale + _tileTemplate.transform.localScale.y / 2f, j);
 
 
                             Trap trapComponent = go.GetComponent<Trap>();
@@ -179,6 +192,8 @@ public class ChunkMakerInspector : Editor
             chunk.tiles = new GameObject[chunkSize.vector2IntValue.x * chunkSize.vector2IntValue.y];
             chunk.connectionPoint = go.transform.position.OffsetZ(LastTileLineIndex() + 1) - (Vector3.right * chunkSize.vector2IntValue.x / 2);
 
+            chunk.difficulty = difficulty.intValue;
+
             chunkMaker.tiles.CopyTo(chunk.tiles,0);
 
             for (int i = 0; i < tiles.arraySize; i++)
@@ -206,8 +221,8 @@ public class ChunkMakerInspector : Editor
                 }
             }
            
-            go.name = chunkName;
-            PrefabUtility.SaveAsPrefabAsset(go, "Assets/Prefabs/Chunks/" + chunkName + ".prefab");
+            go.name = chunkName + "D" + chunk.difficulty;
+            PrefabUtility.SaveAsPrefabAsset(go, "Assets/Prefabs/Chunks/" + chunkName + "_D" + chunk.difficulty + ".prefab");
 
             GetRandomChunkName();
 

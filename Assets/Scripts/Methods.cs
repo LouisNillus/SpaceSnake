@@ -363,6 +363,7 @@ public static class Methods
             case TrapDirection.Right: return Vector3.right;
             case TrapDirection.Forward: return Vector3.forward;
             case TrapDirection.Backward: return Vector3.back;
+            case TrapDirection.Static: return Vector3.zero;
             default: return Vector3.zero;
         }
     }

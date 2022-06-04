@@ -11,6 +11,7 @@ public class Trap : MonoBehaviour
     [Tooltip("In seconds")]
     public float poppingSpeed = 0.5f;
     public TrapDirection direction;
+    public int tilesMove = 1;
     [Tooltip("In tiles")]
     public int activationDistance;
 
@@ -49,7 +50,15 @@ public class Trap : MonoBehaviour
     public void Move()
     {
         initPos = this.transform.localPosition;
-        this.transform.DOLocalMove(initPos + Methods.DirectionToVector(direction) * 1f, poppingSpeed).SetEase(Ease.InOutSine);
+
+        if(direction == TrapDirection.Up)
+        {
+            this.transform.DOLocalMove(initPos + Methods.DirectionToVector(direction) * tilesMove * (this.transform.localScale.y + 0.1f), poppingSpeed).SetEase(Ease.InOutSine);
+        }
+        else
+        {
+            this.transform.DOLocalMove(initPos + Methods.DirectionToVector(direction) * tilesMove, poppingSpeed).SetEase(Ease.InOutSine);
+        }
     }
 
     public void Reset()
@@ -75,5 +84,6 @@ public enum TrapDirection
     Left,
     Right,
     Forward,
-    Backward
+    Backward,
+    Static
 }

@@ -13,6 +13,7 @@ public class Chunk : MonoBehaviour
 
     public List<Trap> traps = new List<Trap>();
 
+    [HideInInspector]
     public bool ingame;
 
     Camera cam;
@@ -37,6 +38,8 @@ public class Chunk : MonoBehaviour
         {
             trap.Reset();
         }
+
+        LevelGenerator.instance.SpawnChunk(0);
     }
 
 }

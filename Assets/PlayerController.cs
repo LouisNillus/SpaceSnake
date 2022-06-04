@@ -31,8 +31,8 @@ public class PlayerController : MonoBehaviour
 
 
         //Keyboard Debug
-        if (Input.GetKey(KeyCode.RightArrow)) this.transform.position += Vector3.right * Time.deltaTime;
-        if (Input.GetKey(KeyCode.LeftArrow)) this.transform.position += Vector3.left * Time.deltaTime;
+        if (Input.GetKey(KeyCode.RightArrow)) this.transform.position += Vector3.right * Time.deltaTime * xSpeed;
+        if (Input.GetKey(KeyCode.LeftArrow)) this.transform.position += Vector3.left * Time.deltaTime * xSpeed;
 
         Movement();
 
