@@ -6,18 +6,6 @@ public class Collectible : MonoBehaviour
 {
     public CollectibleType type;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if(other.CompareTag("Player"))
@@ -28,6 +16,7 @@ public class Collectible : MonoBehaviour
             {
                 case CollectibleType.Score:
                     RunHandler.instance.AddScore();
+                    UIManager.instance.rhombusLogo.Play();
                     break;
                 case CollectibleType.Money:
                     RunHandler.instance.AddMoney();

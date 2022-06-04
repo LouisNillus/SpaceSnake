@@ -1,19 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Chunk : MonoBehaviour
 {
     public int difficulty;
 
-    [HideInInspector]
-    public GameObject[] tiles = new GameObject[0];
+    //[HideInInspector]
+    public GameObject[] allTiles = new GameObject[0];
+    public List<GameObject> filledTiles;
 
     public Vector3 connectionPoint;
 
     public List<Trap> traps = new List<Trap>();
 
-    [HideInInspector]
+    //[HideInInspector]
     public bool ingame;
 
     Camera cam;
@@ -32,6 +34,10 @@ public class Chunk : MonoBehaviour
     {
         this.transform.position = Vector3.one * Random.Range(-5000, -50);
         LevelGenerator.instance.chunks.Add(this.gameObject);
+        LevelGenerator.instance.chunksByDifficulty[difficulty].chunks.Add(this);
+
+        
+
         ingame = false;
 
         foreach(Trap trap in traps)
@@ -39,7 +45,22 @@ public class Chunk : MonoBehaviour
             trap.Reset();
         }
 
-        LevelGenerator.instance.SpawnChunk(0);
+        foreach(GameObject go in filledTiles)
+        {
+            go.GetComponent<Tile>().RecycleCollectible();
+        }
+
+        LevelGenerator.instance.SpawnChunk(RunHandler.instance.currentDifficulty);
     }
+
+    public void PopRandomCollectibles(CollectibleType type, int amount)
+    {
+        for (int i = 0; i < amount; i++)
+        {
+            filledTiles[Random.Range(0, filledTiles.Count)].GetComponent<Tile>().SpawnCollectible(type);
+        }
+    }
+
+
 
 }

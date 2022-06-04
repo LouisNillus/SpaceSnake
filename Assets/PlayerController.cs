@@ -10,7 +10,7 @@ public class PlayerController : MonoBehaviour
 
     public float zSpeed = 6f;
 
-    Rigidbody rb;
+    [HideInInspector] public Rigidbody rb;
 
     public static PlayerController instance;
 
@@ -64,6 +64,29 @@ public class PlayerController : MonoBehaviour
         else
         {
             deltaX = 0f;
+        }
+    }
+
+    public void Kill()
+    {
+        StartCoroutine(SlowDownZ(1f));
+        xSpeed = 0f;
+
+        rb.useGravity = true;
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
+    }
+
+    public IEnumerator SlowDownZ(float duration)
+    {
+        float t = 0f;
+
+        float currentZSpeed = zSpeed;
+
+        while(t < duration)
+        {
+            zSpeed = Mathf.Lerp(currentZSpeed, 0, t/duration);
+            t += Time.deltaTime;
+            yield return null;
         }
     }
 }

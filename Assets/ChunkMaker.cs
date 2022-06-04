@@ -6,6 +6,7 @@ public class ChunkMaker : MonoBehaviour
 {
     public GameObject tileTemplate;
     public GameObject trapTemplate;
+    public GameObject killZoneTemplate;
     public GameObject chunkTemplate;
 
     public int difficulty;

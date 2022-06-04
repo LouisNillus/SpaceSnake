@@ -7,7 +7,10 @@ public class CollectiblesManager : MonoBehaviour
 
     public static CollectiblesManager instance;
 
+    public List<GameObject> collectibles = new List<GameObject>();
     public List<ParticleSystem> particlesPop = new List<ParticleSystem>();
+
+    public float probability;
 
     private void Awake()
     {
@@ -35,5 +38,36 @@ public class CollectiblesManager : MonoBehaviour
 
             particlesPop.Remove(ps);
         }
+    }
+
+    public GameObject FindCollectible()
+    {
+        if (collectibles.Count > 0)
+        {
+            GameObject go = collectibles[0];
+            collectibles.Remove(go);
+            return go;
+        }
+        else return null;
+    }
+
+    public GameObject FindCollectibleOfType(CollectibleType type)
+    {
+        if (collectibles.Count > 0)
+        {
+            for (int i = 0; i < collectibles.Count; i++)
+            {
+                GameObject go = collectibles[i];
+
+                if (go.GetComponent<Collectible>().type == type)
+                {
+                    collectibles.Remove(go);
+                    return go;
+                }               
+            }
+
+        }
+
+        return null;
     }
 }

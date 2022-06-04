@@ -94,9 +94,8 @@ public class LevelGeneratorInspector : Editor
 
             for (int i = 0;  i < maxDifficultyLevel.intValue;  i++)
             {
-                levelGenerator.chunksByDifficulty.Add(i, new List<Chunk>());
+                levelGenerator.chunksByDifficulty.Add(new DifficultyChunkList(i));
             }
-
 
             for (int j = 0; j < chunks.arraySize; j++)
             {
@@ -111,25 +110,20 @@ public class LevelGeneratorInspector : Editor
 
                 Chunk chunk = go.GetComponent<Chunk>();
 
-                List<Chunk> refChunks;
-                levelGenerator.chunksByDifficulty.TryGetValue(chunk.difficulty, out refChunks);
-
-                if(refChunks == null)
-                {
-                    levelGenerator.chunksByDifficulty.Add(chunk.difficulty, new List<Chunk>());
-                    levelGenerator.chunksByDifficulty.TryGetValue(chunk.difficulty, out refChunks);
-                }
+                List<Chunk> refChunks = levelGenerator.chunksByDifficulty[chunk.difficulty].chunks;
 
                 refChunks.Add(chunk);
             }
 
             sortRequired = false;
 
+        serializedObject.ApplyModifiedProperties();
         }
 
         EditorGUILayout.HelpBox(sortRequired ? "Sort Required" : "Sort Complete", sortRequired ? MessageType.Warning : MessageType.Info);
 
         serializedObject.ApplyModifiedProperties();
+        EditorUtility.SetDirty(levelGenerator);
     }
 
     public int GetCount(GameObject go)

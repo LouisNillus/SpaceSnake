@@ -44,7 +44,7 @@ public class Trap : MonoBehaviour
 
     public string GetTrapCode()
     {
-        return direction.ToString()[0] + activationDistance.ToString();
+        return direction.ToString()[0] + tilesMove.ToString() + " [" + activationDistance.ToString() + "]";
     }
 
     public void Move()

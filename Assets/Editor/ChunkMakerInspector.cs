@@ -4,7 +4,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
 using UnityEditor;
-using System;
+using System.Linq;
 
 [CustomEditor(typeof(ChunkMaker))]
 public class ChunkMakerInspector : Editor
@@ -15,6 +15,7 @@ public class ChunkMakerInspector : Editor
     SerializedProperty chunkSize;
     SerializedProperty tileTemplate;
     SerializedProperty trapTemplate;
+    SerializedProperty killZoneTemplate;
     SerializedProperty chunkTemplate;
     SerializedProperty tiles;
     SerializedProperty traps;
@@ -22,9 +23,10 @@ public class ChunkMakerInspector : Editor
 
     public TileType typeOfTiles;
 
-    [Header("Trap Settings")]
+    
     public TrapDirection trapDirection;
-    public int activationDistance;
+    public int activationDistance = 6;
+    public int tilesTraveled = 1;
 
     string chunkName;
 
@@ -35,6 +37,7 @@ public class ChunkMakerInspector : Editor
         chunkSize = serializedObject.FindProperty("chunkSize");
         tileTemplate = serializedObject.FindProperty("tileTemplate");
         trapTemplate = serializedObject.FindProperty("trapTemplate");
+        killZoneTemplate = serializedObject.FindProperty("killZoneTemplate");
         chunkTemplate = serializedObject.FindProperty("chunkTemplate");
 
         tiles = serializedObject.FindProperty("tiles");
@@ -53,6 +56,7 @@ public class ChunkMakerInspector : Editor
         EditorGUILayout.PropertyField(chunkSize);
         EditorGUILayout.PropertyField(tileTemplate);
         EditorGUILayout.PropertyField(trapTemplate);
+        EditorGUILayout.PropertyField(killZoneTemplate);
         EditorGUILayout.PropertyField(chunkTemplate);
 
         typeOfTiles = (TileType)EditorGUILayout.EnumPopup("Tiles Type", typeOfTiles);
@@ -67,7 +71,7 @@ public class ChunkMakerInspector : Editor
             traps.arraySize = chunkSize.vector2IntValue.x * chunkSize.vector2IntValue.y;
         }
 
-        if (typeOfTiles == TileType.Floor)
+        if (typeOfTiles == TileType.Floor) //Floor Map
         {
             GUILayout.BeginHorizontal();
 
@@ -110,6 +114,8 @@ public class ChunkMakerInspector : Editor
 
             trapDirection = (TrapDirection)EditorGUILayout.EnumPopup("Direction", trapDirection);
             activationDistance = EditorGUILayout.IntSlider("Trigger Distance", activationDistance, 1, 20);
+
+            if(trapDirection != TrapDirection.Static) tilesTraveled = EditorGUILayout.IntSlider("Tiles Traveled", tilesTraveled, 1, 9);
 
             GUILayout.BeginHorizontal();
 
@@ -154,6 +160,7 @@ public class ChunkMakerInspector : Editor
                             Trap trapComponent = go.GetComponent<Trap>();
                             trapComponent.direction = trapDirection;
                             trapComponent.activationDistance = activationDistance;
+                            trapComponent.tilesMove = tilesTraveled;
 
 
                             Get1DElementIndex(traps, i, j).objectReferenceValue = go;
@@ -189,27 +196,41 @@ public class ChunkMakerInspector : Editor
 
             Chunk chunk = go.GetComponent<Chunk>();
 
-            chunk.tiles = new GameObject[chunkSize.vector2IntValue.x * chunkSize.vector2IntValue.y];
-            chunk.connectionPoint = go.transform.position.OffsetZ(LastTileLineIndex() + 1) - (Vector3.right * chunkSize.vector2IntValue.x / 2);
+            int lastLineIndex = LastTileLineIndex();
+
+            chunk.allTiles = new GameObject[chunkSize.vector2IntValue.x * chunkSize.vector2IntValue.y];
+            chunk.connectionPoint = go.transform.position.OffsetZ(lastLineIndex + 1) - (Vector3.right * chunkSize.vector2IntValue.x / 2);
 
             chunk.difficulty = difficulty.intValue;
 
-            chunkMaker.tiles.CopyTo(chunk.tiles,0);
+            chunkMaker.tiles.CopyTo(chunk.allTiles,0);
+
 
             for (int i = 0; i < tiles.arraySize; i++)
             {
                 Object tile = tiles.GetArrayElementAtIndex(i).objectReferenceValue;
                 Object trap = traps.GetArrayElementAtIndex(i).objectReferenceValue;
 
-                if (tile != null)
+                if (tile != null) //Tiles
                 {
                     GameObject tileGO = tile as GameObject;
 
                     tileGO.transform.position += go.transform.position;
                     tileGO.transform.parent = go.transform;
                 }
+                else if (tile == null && Get2DPosFrom1D(i).y <= lastLineIndex) //Kill Zones
+                {
+                    Object o = PrefabUtility.InstantiatePrefab(killZoneTemplate.objectReferenceValue);
+                    GameObject killZone = o as GameObject;
 
-                if(trap != null)
+                    killZone.GetComponent<KillZone>().chunk = chunk;
+                    killZone.transform.position = new Vector3(Get2DPosFrom1D(i).x, 0 + ((tileTemplate.objectReferenceValue as GameObject).transform.localScale.y / 2f), Get2DPosFrom1D(i).y);
+
+                    killZone.transform.position += go.transform.position;
+                    killZone.transform.parent = go.transform;
+                }
+
+                if(trap != null) //Traps
                 {
                     GameObject trapGO = trap as GameObject;
 
@@ -220,9 +241,12 @@ public class ChunkMakerInspector : Editor
                     chunk.traps.Add(trapGO.GetComponent<Trap>());
                 }
             }
-           
+
+            chunk.filledTiles = chunk.allTiles.ToList<GameObject>();
+            chunk.filledTiles.RemoveAll(x => x == null);
+
             go.name = chunkName + "D" + chunk.difficulty;
-            PrefabUtility.SaveAsPrefabAsset(go, "Assets/Prefabs/Chunks/" + chunkName + "_D" + chunk.difficulty + ".prefab");
+            PrefabUtility.SaveAsPrefabAsset(go, "Assets/Prefabs/Chunks/" + "D" + chunk.difficulty + "_" + chunkName +  ".prefab");
 
             GetRandomChunkName();
 
@@ -242,6 +266,11 @@ public class ChunkMakerInspector : Editor
     public SerializedProperty Get1DElementIndex(SerializedProperty from, int x, int y)
     {
         return from.GetArrayElementAtIndex(x + (y * chunkSize.vector2IntValue.x));
+    }
+
+    public Vector2Int Get2DPosFrom1D(int index)
+    {
+        return new Vector2Int(index % chunkSize.vector2IntValue.x, index / chunkSize.vector2IntValue.x);
     }
 
     public int LastTileLineIndex()

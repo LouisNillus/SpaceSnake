@@ -12,7 +12,7 @@ public class FollowTarget : MonoBehaviour
     {
         initialPosition = this.transform.position;
     }
-
+        
     void Update()
     {
         this.transform.position = initialPosition.ChangeX(0) + target.position.ChangeY(0);

@@ -14,12 +14,12 @@ public class LevelGenerator : MonoBehaviour
 
     public int maxDifficultyLevel;
 
-    public Dictionary<int, List<Chunk>> chunksByDifficulty = new Dictionary<int, List<Chunk>>();
+    public List<DifficultyChunkList> chunksByDifficulty = new List<DifficultyChunkList>();
 
 
     public static LevelGenerator instance;
 
-    
+
 
 
     private void Awake()
@@ -36,7 +36,7 @@ public class LevelGenerator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
 
@@ -49,23 +49,28 @@ public class LevelGenerator : MonoBehaviour
     {
         if (chunks.Count == 0) return;
 
+        List<Chunk> currentDifficultyChunks = chunksByDifficulty[difficulty].chunks;
 
-        int i = Random.Range(0, chunks.Count);
+        if (currentDifficultyChunks.Count == 0) return;
 
-        GameObject go = chunks[i];
 
-        chunks.Remove(go);
+        Chunk c = currentDifficultyChunks[Random.Range(0, currentDifficultyChunks.Count)];
 
-        if(lastChunk == null)
+        c.PopRandomCollectibles(CollectibleType.Score, 3);
+
+        currentDifficultyChunks.Remove(c);
+        chunks.Remove(c.gameObject);
+
+        if (lastChunk == null)
         {
-            go.transform.position = Vector3.zero;
+            c.transform.position = Vector3.zero;
         }
         else
         {
-            go.transform.position = lastChunk.connectionPoint + lastChunk.transform.position;
+            c.transform.position = lastChunk.connectionPoint + lastChunk.transform.position;
         }
 
-        lastChunk = go.GetComponent<Chunk>();
+        lastChunk = c;
         lastChunk.ingame = true;
     }
 
@@ -76,4 +81,6 @@ public class LevelGenerator : MonoBehaviour
             SpawnChunk(0);
         }
     }
+
+
 }
