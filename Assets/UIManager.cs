@@ -8,6 +8,9 @@ public class UIManager : MonoBehaviour
     public static UIManager instance;
 
     public GameObject lostPanel;
+    public GameObject ad;
+    public GameObject closeAd;
+    public GameObject tutoBar;
 
     public UIScaler rhombusLogo;
 
@@ -32,4 +35,25 @@ public class UIManager : MonoBehaviour
     {
         lostPanel.SetActive(true);
     }
+
+    public void AdRoulette()
+    {
+        int i = Random.Range(0, 100);
+
+        if (i > 50) ShowAd();
+    }
+
+    public void ShowAd()
+    {
+        ad.SetActive(true);
+        StartCoroutine(ShowAdRoutine(5));
+    }
+
+    public IEnumerator ShowAdRoutine(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        closeAd.SetActive(true);
+    }
+
+
 }

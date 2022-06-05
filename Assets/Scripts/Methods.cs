@@ -6,6 +6,7 @@ using Random = UnityEngine.Random;
 using System;
 using Debug = UnityEngine.Debug;
 using System.Diagnostics;
+using UnityEngine.EventSystems;
 public static class Methods
 {
 
@@ -366,5 +367,14 @@ public static class Methods
             case TrapDirection.Static: return Vector3.zero;
             default: return Vector3.zero;
         }
+    }
+
+    public static bool IsPointerOverUIObject()
+    {
+        PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);
+        eventDataCurrentPosition.position = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
+        return results.Count > 0;
     }
 }

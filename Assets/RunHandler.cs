@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using DG.Tweening;
+using UnityEngine.EventSystems;
 
 public class RunHandler : MonoBehaviour
 {
@@ -24,6 +25,8 @@ public class RunHandler : MonoBehaviour
 
     PlayerController player;
 
+    public bool autoStart;
+
     public bool canStart = false;
 
     private void Awake()
@@ -31,7 +34,6 @@ public class RunHandler : MonoBehaviour
         instance = this;
     }
 
-    float skyboxRotation;
     // Start is called before the first frame update
     void Start()
     {
@@ -41,24 +43,31 @@ public class RunHandler : MonoBehaviour
         WriteDifficulty();
 
         initialPlayerZ = player.transform.position.z;
-
-        //PUT SOMEWHERE ELSE
-        DOTween.To(() => skyboxRotation, x => skyboxRotation = x, 360, 360).SetLoops(-1, LoopType.Yoyo).OnUpdate(()=> RenderSettings.skybox.SetFloat("_Rotation", skyboxRotation));
     }
 
     // Update is called once per frame
     void Update()
     {
         distance = Mathf.Abs(player.transform.position.z - initialPlayerZ);
-        WriteDistance();        
+        WriteDistance();
+        
+        if((canStart && Input.touchCount > 0 && !Methods.IsPointerOverUIObject()) || autoStart)
+        {            
+            player.StartPlayer();
+            LevelGenerator.instance.InitialSpawn();
+            UIManager.instance.tutoBar.SetActive(false);      
+        }
     }
 
-    public void Reset()
+    public void ResetRunInfos()
     {
         score = 0;
         scoreText.text = score.ToString();
         money = 0;
-        distance = 0f;       
+        currentDifficulty = 0;
+        WriteDifficulty();
+        distance = 0f;
+        WriteDistance();
     }
 
     public void AddScore(int value = 1)
@@ -87,5 +96,12 @@ public class RunHandler : MonoBehaviour
     public void WriteDistance()
     {
         distanceText.text = distance.ToString("F0") + "m";
+    }
+
+    public void NewRun()
+    {
+        LevelGenerator.instance.ResetActiveChunks();
+        UIManager.instance.tutoBar.SetActive(true);
+        ResetRunInfos();
     }
 }

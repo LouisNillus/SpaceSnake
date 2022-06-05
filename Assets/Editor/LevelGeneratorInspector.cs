@@ -13,10 +13,11 @@ public class LevelGeneratorInspector : Editor
 
     SerializedProperty poolContainer;
     SerializedProperty chunksTemplates;
+    SerializedProperty activeChunks;
     SerializedProperty chunks;
     SerializedProperty maxDifficultyLevel;
+    SerializedProperty initialChunksCount;
 
-    bool sortRequired = true;
     int lastChunksCount = 0;
 
     bool foldoutStatus = true;
@@ -29,6 +30,8 @@ public class LevelGeneratorInspector : Editor
         chunksTemplates = serializedObject.FindProperty("chunksTemplates");
         chunks = serializedObject.FindProperty("chunks");
         maxDifficultyLevel = serializedObject.FindProperty("maxDifficultyLevel");
+        initialChunksCount = serializedObject.FindProperty("initialChunksCount");
+        activeChunks = serializedObject.FindProperty("activeChunks");
 
         lastChunksCount = chunks.arraySize;
 
@@ -41,8 +44,10 @@ public class LevelGeneratorInspector : Editor
 
         EditorGUILayout.PropertyField(poolContainer);
         EditorGUILayout.PropertyField(chunks);
+        EditorGUILayout.PropertyField(activeChunks);
         EditorGUILayout.PropertyField(chunksTemplates);
         EditorGUILayout.PropertyField(maxDifficultyLevel);
+        EditorGUILayout.PropertyField(initialChunksCount);
 
         EditorGUILayout.Space(20);
 
@@ -66,12 +71,16 @@ public class LevelGeneratorInspector : Editor
                     chunk.transform.parent = (poolContainer.objectReferenceValue as Transform);
                     chunk.transform.localPosition = Vector3.zero;
 
+                    levelGenerator.sorted = false;
+
                     levelGenerator.chunks.Add(chunk);
                 }
 
                 if (GUILayout.Button("-"))
                 {
                     GameObject chunk = FindFromPrefab(go);
+
+                    levelGenerator.sorted = false;
 
                     levelGenerator.chunks.Remove(chunk);
                     DestroyImmediate(chunk);
@@ -83,9 +92,11 @@ public class LevelGeneratorInspector : Editor
 
         if(lastChunksCount != chunks.arraySize)
         {
-            sortRequired = true;
+            levelGenerator.sorted = false;
             lastChunksCount = chunks.arraySize;
         }
+
+        EditorGUILayout.HelpBox(!levelGenerator.sorted ? "Sort Required" : "Sort Complete", !levelGenerator.sorted ? MessageType.Warning : MessageType.Info);
 
         if (GUILayout.Button("Sort By Difficulty"))
         {
@@ -115,12 +126,11 @@ public class LevelGeneratorInspector : Editor
                 refChunks.Add(chunk);
             }
 
-            sortRequired = false;
+            levelGenerator.sorted = true;
 
         serializedObject.ApplyModifiedProperties();
         }
 
-        EditorGUILayout.HelpBox(sortRequired ? "Sort Required" : "Sort Complete", sortRequired ? MessageType.Warning : MessageType.Info);
 
         serializedObject.ApplyModifiedProperties();
         EditorUtility.SetDirty(levelGenerator);

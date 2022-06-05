@@ -30,10 +30,12 @@ public class Chunk : MonoBehaviour
         if (ingame && this.transform.position.z + connectionPoint.z < cam.transform.position.z) Recycle();
     }
 
-    public void Recycle()
+    public void Recycle(bool respawn = true)
     {
-        this.transform.position = Vector3.one * Random.Range(-5000, -50);
+        this.transform.position = LevelGenerator.instance.poolContainer.position;
         LevelGenerator.instance.chunks.Add(this.gameObject);
+        LevelGenerator.instance.activeChunks.Remove(this);
+
         LevelGenerator.instance.chunksByDifficulty[difficulty].chunks.Add(this);
 
         
@@ -50,7 +52,7 @@ public class Chunk : MonoBehaviour
             go.GetComponent<Tile>().RecycleCollectible();
         }
 
-        LevelGenerator.instance.SpawnChunk(RunHandler.instance.currentDifficulty);
+        if(respawn) LevelGenerator.instance.SpawnChunk(RunHandler.instance.currentDifficulty);
     }
 
     public void PopRandomCollectibles(CollectibleType type, int amount)

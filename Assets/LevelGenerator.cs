@@ -7,6 +7,7 @@ public class LevelGenerator : MonoBehaviour
     public Transform poolContainer;
 
     public List<GameObject> chunks = new List<GameObject>();
+    public List<Chunk> activeChunks = new List<Chunk>();
 
     public List<GameObject> chunksTemplates = new List<GameObject>();
 
@@ -19,8 +20,9 @@ public class LevelGenerator : MonoBehaviour
 
     public static LevelGenerator instance;
 
+    public int initialChunksCount;
 
-
+    public bool sorted;
 
     private void Awake()
     {
@@ -30,7 +32,7 @@ public class LevelGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        InitialSpawn(5);
+        InitialSpawn();
     }
 
     // Update is called once per frame
@@ -40,9 +42,15 @@ public class LevelGenerator : MonoBehaviour
     }
 
 
-    public void GetChunk()
+    public void ResetActiveChunks()
     {
+        for (int i = 0; i < activeChunks.Count; i++)
+        {
+            activeChunks[i].Recycle(false);
+            i--; //Car dans la fonction de Recycle l'objet se retire de la liste
+        }
 
+        lastChunk = null;
     }
 
     public void SpawnChunk(int difficulty)
@@ -60,6 +68,7 @@ public class LevelGenerator : MonoBehaviour
 
         currentDifficultyChunks.Remove(c);
         chunks.Remove(c.gameObject);
+        activeChunks.Add(c);
 
         if (lastChunk == null)
         {
@@ -74,9 +83,9 @@ public class LevelGenerator : MonoBehaviour
         lastChunk.ingame = true;
     }
 
-    public void InitialSpawn(int quantity)
+    public void InitialSpawn()
     {
-        for (int i = 0; i < quantity; i++)
+        for (int i = 0; i < initialChunksCount; i++)
         {
             SpawnChunk(0);
         }

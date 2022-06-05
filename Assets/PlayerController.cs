@@ -5,14 +5,20 @@ using DG.Tweening;
 
 public class PlayerController : MonoBehaviour
 {
-    public float xSpeed;
-    public float deltaX;
+    
+    float deltaX;
 
-    public float zSpeed = 6f;
+    [HideInInspector] public float xSpeed;
+    [HideInInspector] public float zSpeed = 6f;
+
+    public float initialXSpeed;
+    public float initialZSpeed = 6f;
 
     [HideInInspector] public Rigidbody rb;
 
     public static PlayerController instance;
+
+    Vector3 initialPosition;
 
     private void Awake()
     {
@@ -22,28 +28,21 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        initialPosition = this.transform.position;
         rb = GetComponent<Rigidbody>();
+
+        xSpeed = 0f;
+        zSpeed = 0f;
     }
 
     // Update is called once per frame
     void Update()
     {
-
-
         //Keyboard Debug
         if (Input.GetKey(KeyCode.RightArrow)) this.transform.position += Vector3.right * Time.deltaTime * xSpeed;
         if (Input.GetKey(KeyCode.LeftArrow)) this.transform.position += Vector3.left * Time.deltaTime * xSpeed;
 
         Movement();
-
-
-        /*if(Input.touchCount > 0)
-        {
-            delta = Input.GetTouch(0).deltaPosition.x;
-            this.transform.Translate(Vector3.right * delta * Time.deltaTime * xSpeed);
-        }*/
-
-
     }
 
     private void FixedUpdate()
@@ -67,16 +66,28 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void StartPlayer()
+    {
+        xSpeed = initialXSpeed;
+        zSpeed = initialZSpeed;
+    }
+
+    public void StopPlayer()
+    {
+        xSpeed = 0f;
+        zSpeed = 0f;
+    }
+
     public void Kill()
     {
-        StartCoroutine(SlowDownZ(1f));
+        StartCoroutine(KilledSlowDownZ(1f));
         xSpeed = 0f;
-
+        
         rb.useGravity = true;
         rb.constraints = RigidbodyConstraints.FreezeRotation;
     }
 
-    public IEnumerator SlowDownZ(float duration)
+    public IEnumerator KilledSlowDownZ(float duration)
     {
         float t = 0f;
 
@@ -88,5 +99,16 @@ public class PlayerController : MonoBehaviour
             t += Time.deltaTime;
             yield return null;
         }
+
+        ResetPlayer();
+        UIManager.instance.LostPanel();
+    }
+
+    public void ResetPlayer()
+    {
+        StopPlayer();
+        this.transform.position = initialPosition;
+        rb.useGravity = false;
+        rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
     }
 }

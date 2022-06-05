@@ -30,18 +30,4 @@ public class KillZone : MonoBehaviour
     {
         Gizmos.DrawWireSphere(this.transform.position, killRadius);
     }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if(other.CompareTag("Player"))
-        {
-            Rigidbody rb = other.gameObject.GetComponent<Rigidbody>();
-            other.gameObject.GetComponent<PlayerController>().zSpeed = 0.5f;
-
-            rb.useGravity = true;
-            rb.constraints = RigidbodyConstraints.FreezeRotation;
-        }
-    }
-
-
 }
