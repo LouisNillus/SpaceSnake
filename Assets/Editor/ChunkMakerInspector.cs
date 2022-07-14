@@ -246,7 +246,9 @@ public class ChunkMakerInspector : Editor
             chunk.filledTiles.RemoveAll(x => x == null);
 
             go.name = chunkName + "D" + chunk.difficulty;
-            PrefabUtility.SaveAsPrefabAsset(go, "Assets/Prefabs/Chunks/" + "D" + chunk.difficulty + "_" + chunkName +  ".prefab");
+            GameObject savedAsset = PrefabUtility.SaveAsPrefabAsset(go, "Assets/Prefabs/Chunks/" + "D" + chunk.difficulty + "_" + chunkName +  ".prefab");
+
+            FindObjectOfType<LevelGenerator>().chunksTemplates.Add(savedAsset);
 
             GetRandomChunkName();
 
